@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    # restart: always
+    volumes: 
+      - mongo-data:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    # restart: always
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=user
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_URL=mongodb://user:pass@mongodb:27017/
+    depends_on:
+      - mongodb
+
+  app:
+    build: ./checker
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodb
+
+  web:
+    build: ./plot
+    ports:
+      - 5050:5050
+    depends_on:
+      - app
+
+volumes:
+  mongo-data:
